@@ -1,13 +1,10 @@
-public class Hello 
-{ 
-    public static void main( String argv[] ) 
-    { 
-        // Default is "World" 
-        // Author: Jim Weirich (jim@somewhere.com)  
-        String name = "World"; 
-        if ( argv.length != 0 ) { 
-            name = argv[0]; 
-        } 
-        System.out.println( "Hello, " + name + "!"); 
-    } 
-}  
+public class Hello {
+    public static void main( String argv[] ) {
+        String name = "World"; // Default is "World"
+        if ( argv.length != 0 ) {
+             name = argv[0];
+        }
+        Greeter greeter = new Greeter(name);
+        System.out.println(greeter.greet());
+    }
+}
