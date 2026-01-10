@@ -8,9 +8,6 @@ public class ShoppingCart {
 
     public static enum ItemType { NEW, REGULAR, SECOND_FREE, SALE };
 
-    /**
-     * Container for added items
-     */
     private List<Item> items = new ArrayList<Item>();
 
     public static void main(String[] args) {
@@ -22,6 +19,8 @@ public class ShoppingCart {
         System.out.println(cart.formatTicket());
     }
 
+    /** * Рефакторинг addItem: використання сеттерів (п. 3.6)
+     */
     public void addItem(String title, double price, int quantity, ItemType type) {
         if (title == null || title.length() == 0 || title.length() > 32)
             throw new IllegalArgumentException("Illegal title");
@@ -29,17 +28,15 @@ public class ShoppingCart {
             throw new IllegalArgumentException("Illegal price");
         if (quantity <= 0)
             throw new IllegalArgumentException("Illegal quantity");
+
         Item item = new Item();
-        item.title = title;
-        item.price = price;
-        item.quantity = quantity;
-        item.type = type;
+        item.setTitle(title);
+        item.setPrice(price);
+        item.setQuantity(quantity);
+        item.setType(type);
         items.add(item);
     }
 
-    /**
-     * Formats shopping price.
-     */
     public String formatTicket() {
         if (items.size() == 0)
             return "No items.";
@@ -50,23 +47,25 @@ public class ShoppingCart {
 
         double total = 0.00;
         int index = 0;
+
+        // Рефакторинг: Розрахунок параметрів через об'єкт Item (п. 3.6)
         for (Item item : items) {
-            int discount = calculateDiscount(item.type, item.quantity);
-            double itemTotal = item.price * item.quantity * (100.00 - discount) / 100.00;
+            item.setDiscount(calculateDiscount(item.getType(), item.getQuantity()));
+            item.setTotalPrice(item.getPrice() * item.getQuantity() * (100.00 - item.getDiscount()) / 100.00);
+
             lines.add(new String[]{
                     String.valueOf(++index),
-                    item.title,
-                    MONEY.format(item.price),
-                    String.valueOf(item.quantity),
-                    (discount == 0) ? "-" : (String.valueOf(discount) + "%"),
-                    MONEY.format(itemTotal)
+                    item.getTitle(),
+                    MONEY.format(item.getPrice()),
+                    String.valueOf(item.getQuantity()),
+                    (item.getDiscount() == 0) ? "-" : (item.getDiscount() + "%"),
+                    MONEY.format(item.getTotalPrice())
             });
-            total += itemTotal;
+            total += item.getTotalPrice();
         }
 
         String[] footer = {String.valueOf(index), "", "", "", "", MONEY.format(total)};
 
-        // Рефакторинг: Розрахунок ширини колонок (п. 3.5)
         int[] width = new int[]{0, 0, 0, 0, 0, 0};
         for (String[] line : lines)
             adjustColumnWidth(width, line);
@@ -78,8 +77,6 @@ public class ShoppingCart {
             lineLength += w;
 
         StringBuilder sb = new StringBuilder();
-
-        // Рефакторинг: Формування таблиці (п. 3.5)
         appendFormattedLine(sb, header, align, width, true);
         appendSeparator(sb, lineLength);
 
@@ -96,9 +93,7 @@ public class ShoppingCart {
         return sb.toString();
     }
 
-    // --- private section -----------------------------------------------------
-
-    // Нові витягнуті методи згідно з п. 3.5
+    // --- private section ---
     private void appendSeparator(StringBuilder sb, int lineLength) {
         for (int i = 0; i < lineLength; i++)
             sb.append("-");
@@ -118,7 +113,6 @@ public class ShoppingCart {
     }
 
     private static final NumberFormat MONEY;
-
     static {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setDecimalSeparator('.');
@@ -143,31 +137,39 @@ public class ShoppingCart {
     public static int calculateDiscount(ItemType type, int quantity) {
         int discount = 0;
         switch (type) {
-            case NEW:
-                return 0;
-            case REGULAR:
-                discount = 0;
-                break;
-            case SECOND_FREE:
-                if (quantity > 1)
-                    discount = 50;
-                break;
-            case SALE:
-                discount = 70;
-                break;
+            case NEW: return 0;
+            case REGULAR: discount = 0; break;
+            case SECOND_FREE: if (quantity > 1) discount = 50; break;
+            case SALE: discount = 70; break;
         }
         if (discount < 80) {
             discount += quantity / 10;
-            if (discount > 80)
-                discount = 80;
+            if (discount > 80) discount = 80;
         }
         return discount;
     }
 
+    /** * Рефакторинг: Інкапсуляція класу Item (п. 3.6)
+     */
     private static class Item {
-        String title;
-        double price;
-        int quantity;
-        ItemType type;
+        private String title;
+        private double price;
+        private int quantity;
+        private ItemType type;
+        private int discount;
+        private double total;
+
+        public String getTitle() { return title; }
+        public void setTitle(String title) { this.title = title; }
+        public double getPrice() { return price; }
+        public void setPrice(double price) { this.price = price; }
+        public int getQuantity() { return quantity; }
+        public void setQuantity(int quantity) { this.quantity = quantity; }
+        public ItemType getType() { return type; }
+        public void setType(ItemType type) { this.type = type; }
+        public int getDiscount() { return discount; }
+        public void setDiscount(int discount) { this.discount = discount; }
+        public double getTotalPrice() { return total; }
+        public void setTotalPrice(double total) { this.total = total; }
     }
 }
