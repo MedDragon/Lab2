@@ -7,7 +7,6 @@ import java.text.*;
 public class ShoppingCart {
 
     public static enum ItemType { NEW, REGULAR, SECOND_FREE, SALE };
-
     private List<Item> items = new ArrayList<Item>();
 
     public static void main(String[] args) {
@@ -19,8 +18,6 @@ public class ShoppingCart {
         System.out.println(cart.formatTicket());
     }
 
-    /** * Рефакторинг addItem: використання сеттерів (п. 3.6)
-     */
     public void addItem(String title, double price, int quantity, ItemType type) {
         if (title == null || title.length() == 0 || title.length() > 32)
             throw new IllegalArgumentException("Illegal title");
@@ -37,22 +34,33 @@ public class ShoppingCart {
         items.add(item);
     }
 
+    /**
+     * Рефакторинг: фінальний метод formatTicket (п. 3.7-3.8)
+     */
     public String formatTicket() {
-        if (items.size() == 0)
-            return "No items.";
+        if (items.size() == 0) return "No items.";
 
+        calculateItemsParameters(); // Розрахунок даних
+        return getFormattedTicketTable(); // Формування таблиці
+    }
+
+    // Новий метод для розрахунку параметрів (п. 3.7)
+    private void calculateItemsParameters() {
+        for (Item item : items) {
+            item.setDiscount(calculateDiscount(item.getType(), item.getQuantity()));
+            item.setTotalPrice(item.getPrice() * item.getQuantity() * (100.00 - item.getDiscount()) / 100.00);
+        }
+    }
+
+    // Новий метод для формування таблиці (п. 3.8)
+    private String getFormattedTicketTable() {
         List<String[]> lines = new ArrayList<String[]>();
         String[] header = {"#", "Item", "Price", "Quan.", "Discount", "Total"};
         int[] align = new int[]{1, -1, 1, 1, 1, 1};
 
         double total = 0.00;
         int index = 0;
-
-        // Рефакторинг: Розрахунок параметрів через об'єкт Item (п. 3.6)
         for (Item item : items) {
-            item.setDiscount(calculateDiscount(item.getType(), item.getQuantity()));
-            item.setTotalPrice(item.getPrice() * item.getQuantity() * (100.00 - item.getDiscount()) / 100.00);
-
             lines.add(new String[]{
                     String.valueOf(++index),
                     item.getTitle(),
@@ -65,29 +73,19 @@ public class ShoppingCart {
         }
 
         String[] footer = {String.valueOf(index), "", "", "", "", MONEY.format(total)};
-
         int[] width = new int[]{0, 0, 0, 0, 0, 0};
-        for (String[] line : lines)
-            adjustColumnWidth(width, line);
+        for (String[] line : lines) adjustColumnWidth(width, line);
         adjustColumnWidth(width, header);
         adjustColumnWidth(width, footer);
 
         int lineLength = width.length - 1;
-        for (int w : width)
-            lineLength += w;
+        for (int w : width) lineLength += w;
 
         StringBuilder sb = new StringBuilder();
         appendFormattedLine(sb, header, align, width, true);
         appendSeparator(sb, lineLength);
-
-        for (String[] line : lines) {
-            appendFormattedLine(sb, line, align, width, true);
-        }
-
-        if (lines.size() > 0) {
-            appendSeparator(sb, lineLength);
-        }
-
+        for (String[] line : lines) appendFormattedLine(sb, line, align, width, true);
+        if (lines.size() > 0) appendSeparator(sb, lineLength);
         appendFormattedLine(sb, footer, align, width, false);
 
         return sb.toString();
@@ -95,8 +93,7 @@ public class ShoppingCart {
 
     // --- private section ---
     private void appendSeparator(StringBuilder sb, int lineLength) {
-        for (int i = 0; i < lineLength; i++)
-            sb.append("-");
+        for (int i = 0; i < lineLength; i++) sb.append("-");
         sb.append("\n");
     }
 
@@ -108,8 +105,7 @@ public class ShoppingCart {
     private void appendFormattedLine(StringBuilder sb, String[] line, int[] align, int[] width, boolean newLine) {
         for (int i = 0; i < line.length; i++)
             appendFormatted(sb, line[i], align[i], width[i]);
-        if (newLine)
-            sb.append("\n");
+        if (newLine) sb.append("\n");
     }
 
     private static final NumberFormat MONEY;
@@ -120,17 +116,12 @@ public class ShoppingCart {
     }
 
     public static void appendFormatted(StringBuilder sb, String value, int align, int width) {
-        if (value.length() > width)
-            value = value.substring(0, width);
-        int before = (align == 0)
-                ? (width - value.length()) / 2
-                : (align == -1) ? 0 : width - value.length();
+        if (value.length() > width) value = value.substring(0, width);
+        int before = (align == 0) ? (width - value.length()) / 2 : (align == -1) ? 0 : width - value.length();
         int after = width - value.length() - before;
-        while (before-- > 0)
-            sb.append(" ");
+        while (before-- > 0) sb.append(" ");
         sb.append(value);
-        while (after-- > 0)
-            sb.append(" ");
+        while (after-- > 0) sb.append(" ");
         sb.append(" ");
     }
 
@@ -149,8 +140,6 @@ public class ShoppingCart {
         return discount;
     }
 
-    /** * Рефакторинг: Інкапсуляція класу Item (п. 3.6)
-     */
     private static class Item {
         private String title;
         private double price;
