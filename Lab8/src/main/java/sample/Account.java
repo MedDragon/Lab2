@@ -75,6 +75,7 @@ public class Account {
 
 
     public String printCustomer() {
+        // Замість ручного збору рядка викликаємо геттери клієнта
         return customer.getName() + " " + customer.getEmail();
     }
 
@@ -85,5 +86,9 @@ public class Account {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public String getAccountDetails() {
+        return "Account: IBAN: " + iban + ", Money: " + money + ", Account type: " + type;
     }
 }
