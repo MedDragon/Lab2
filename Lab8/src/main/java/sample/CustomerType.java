@@ -10,7 +10,7 @@ public enum CustomerType {
     PERSON {
         @Override
         public double getOverdraftDiscount(boolean isPremium, double companyDiscount) {
-            return 1.0; // Для звичайних людей знижки від компанії немає
+            return 1.0;
         }
     };
 

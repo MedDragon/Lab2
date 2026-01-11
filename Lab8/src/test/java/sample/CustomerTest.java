@@ -1,46 +1,59 @@
 package sample;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
-class CustomerTest {
+public class CustomerTest {
 
-    @org.junit.jupiter.api.Test
-    void withdraw() {
+    @Test
+    public void testWithdrawPersonWithNormalAccount() throws Exception {
+        Account account = getAccountByTypeAndMoney(false, 34.0);
+        Customer customer = getPersonCustomer(account);
+        customer.withdraw(10, "EUR");
+        assertThat(account.getMoneyAmount(), is(24.0));
     }
 
-    @org.junit.jupiter.api.Test
-    void getName() {
+    @Test
+    public void testWithdrawPersonWithPremiumAccountAndOverdraft() throws Exception {
+        Account account = getAccountByTypeAndMoney(true, -10.0);
+        Customer customer = getPersonCustomer(account);
+        customer.withdraw(10, "EUR");
+        assertThat(account.getMoneyAmount(), is(-21.0));
     }
 
-    @org.junit.jupiter.api.Test
-    void setName() {
+    @Test
+    public void testPrintCustomerAccountNormal() throws Exception {
+        Customer customer = getPersonWithAccount(false);
+        assertThat(customer.printCustomerAccount(), is("Account: IBAN: RO023INGB434321431241, Money: 34.0 EUR, Account type: normal"));
     }
 
-    @org.junit.jupiter.api.Test
-    void getEmail() {
+    private Customer getPersonWithAccount(boolean premium) {
+        AccountType accountType = new AccountType(premium);
+        Account account = new Account(accountType, 9);
+        Customer customer = getPersonCustomer(account);
+        account.setIban("RO023INGB434321431241");
+        account.setMoney(34.0, "EUR"); // Використовуємо setMoney для ініціалізації
+        return customer;
     }
 
-    @org.junit.jupiter.api.Test
-    void setEmail() {
+    private Account getAccountByTypeAndMoney(boolean premium, double money) {
+        AccountType accountType = new AccountType(premium);
+        Account account = new Account(accountType, 9);
+        account.setIban("RO023INGB434321431241");
+        account.setMoney(money, "EUR"); // Використовуємо setMoney
+        return account;
     }
 
-    @org.junit.jupiter.api.Test
-    void getCustomerType() {
+    private Customer getPersonCustomer(Account account) {
+        Customer customer = new Customer("danix", "dan", "dan@mail.com", CustomerType.PERSON, account);
+        account.setCustomer(customer);
+        return customer;
     }
 
-    @org.junit.jupiter.api.Test
-    void setCustomerType() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void printCustomerDaysOverdrawn() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void printCustomerMoney() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void printCustomerAccount() {
+    private Customer getCompanyCustomer(Account account) {
+        Customer customer = new Customer("company", "company@mail.com", account, 0.50);
+        account.setCustomer(customer);
+        return customer;
     }
 }

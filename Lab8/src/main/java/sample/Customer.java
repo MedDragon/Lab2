@@ -1,14 +1,12 @@
 package sample;
 
 public class Customer {
-
     private String name;
     private String surname;
     private String email;
     private CustomerType customerType;
     private Account account;
     private double companyOverdraftDiscount = 1;
-
 
     public Customer(String name, String surname, String email, CustomerType customerType, Account account) {
         this.name = name;
@@ -18,7 +16,6 @@ public class Customer {
         this.account = account;
     }
 
-    // use only to create companies
     public Customer(String name, String email, Account account, double companyOverdraftDiscount) {
         this.name = name;
         this.email = email;
@@ -30,61 +27,13 @@ public class Customer {
     public void withdraw(double sum, String currency) {
         checkCurrency(currency);
 
-        if (account.getMoneyAmount() < 0) {
-            // Замість switch просто викликаємо поліморфний метод
+        double currentAmount = account.getMoneyAmount();
+        if (currentAmount < 0) {
             double discount = customerType.getOverdraftDiscount(account.getType().isPremium(), companyOverdraftDiscount);
-            account.setMoneyAmount((account.getMoneyAmount() - sum) - sum * account.overdraftFee() * discount);
+            account.setMoneyAmount((currentAmount - sum) - sum * account.overdraftFee() * discount);
         } else {
-            account.setMoneyAmount(account.getMoneyAmount() - sum);
+            account.setMoneyAmount(currentAmount - sum);
         }
-    }
-
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public CustomerType getCustomerType() {
-        return customerType;
-    }
-
-    public void setCustomerType(CustomerType customerType) {
-        this.customerType = customerType;
-    }
-
-    public String printCustomerDaysOverdrawn() {
-        // Було: String fullName = name + " " + surname + " ";
-        String fullName = getFullName(); // Стало
-        String accountDescription = "Account: IBAN: " + account.getIban() + ", Days Overdrawn: " + account.getDaysOverdrawn();
-        return fullName + accountDescription;
-    }
-
-    public String printCustomerMoney() {
-        // Було: String fullName = name + " " + surname + " ";
-        String fullName = getFullName(); // Стало
-        String accountDescription = "";
-        accountDescription += "Account: IBAN: " + account.getIban() + ", Money: " + account.getMoneyAmount();
-        return fullName + accountDescription;
-    }
-
-    public String printCustomerAccount() {
-        return account.getAccountDetails();
-    }
-
-    public String getFullName() {
-        return name + " " + surname + " ";
     }
 
     private void checkCurrency(String currency) {
@@ -92,4 +41,23 @@ public class Customer {
             throw new RuntimeException("Can't extract withdraw " + currency);
         }
     }
+
+    public String getFullName() {
+        return name + " " + (surname != null ? surname : "") + " ";
+    }
+
+    public String printCustomerDaysOverdrawn() {
+        return getFullName() + "Account: IBAN: " + account.getIban() + ", Days Overdrawn: " + account.getDaysOverdrawn();
+    }
+
+    public String printCustomerMoney() {
+        return getFullName() + "Account: IBAN: " + account.getIban() + ", Money: " + account.getMoneyAmount();
+    }
+
+    public String printCustomerAccount() {
+        return account.getAccountDetails();
+    }
+
+    public String getName() { return name; }
+    public String getEmail() { return email; }
 }

@@ -1,58 +1,49 @@
 package sample;
+import org.junit.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
-import static org.junit.jupiter.api.Assertions.*;
+public class AccountTest {
 
-class AccountTest {
-
-    @org.junit.jupiter.api.Test
-    void bankcharge() {
+    @Test
+    public void testBankchargePremiumLessThanAWeek() {
+        Account account = getPremiumAccount(5);
+        assertThat(account.bankcharge(), is(14.5));
     }
 
-    @org.junit.jupiter.api.Test
-    void overdraftFee() {
+    @Test
+    public void testBankchargePremiumMoreThanAWeek() {
+        Account account = getPremiumAccount(9);
+        assertThat(account.bankcharge(), is(16.5));
     }
 
-    @org.junit.jupiter.api.Test
-    void getDaysOverdrawn() {
+    @Test
+    public void testOverdraftFeePremium() {
+        Account account = getPremiumAccount(9);
+        assertThat(account.overdraftFee(), is(0.10));
     }
 
-    @org.junit.jupiter.api.Test
-    void getIban() {
+    @Test
+    public void testOverdraftFeeNotPremium() {
+        Account account = getNormalAccount();
+        assertThat(account.overdraftFee(), is(0.20));
     }
 
-    @org.junit.jupiter.api.Test
-    void setIban() {
+    @Test
+    public void testPrintCustomer() {
+        Account account = getNormalAccount();
+        Customer customer = new Customer("xxx", "xxx", "xxx@mail.com", CustomerType.PERSON, account);
+        account.setCustomer(customer);
+        assertThat(account.printCustomer(), is("xxx xxx@mail.com"));
     }
 
-    @org.junit.jupiter.api.Test
-    void setMoney() {
+    private Account getNormalAccount() {
+        AccountType premium = new AccountType(false);
+        return new Account(premium, 9);
     }
 
-    @org.junit.jupiter.api.Test
-    void getMoney() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void getCustomer() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void setCustomer() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void getType() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void printCustomer() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void getCurrency() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void setCurrency() {
+    private Account getPremiumAccount(int daysOverdrawn) {
+        AccountType normal = new AccountType(true);
+        return new Account(normal, daysOverdrawn);
     }
 }

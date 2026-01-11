@@ -1,19 +1,16 @@
 package sample;
 
 public class Account {
-
     private String iban;
     private AccountType type;
     private int daysOverdrawn;
-    private Customer customer;
     private Money money;
+    private Customer customer;
 
     public Account(AccountType type, int daysOverdrawn) {
-        super();
         this.type = type;
         this.daysOverdrawn = daysOverdrawn;
     }
-
 
     public double bankcharge() {
         double result = 4.5;
@@ -32,57 +29,42 @@ public class Account {
     }
 
     public double overdraftFee() {
-        if (type.isPremium()) {
-            return 0.10;
+        return type.isPremium() ? 0.10 : 0.20;
+    }
+
+    // Метод для встановлення ТІЛЬКИ суми (використовується у withdraw)
+    public void setMoneyAmount(double amount) {
+        if (this.money == null) {
+            this.money = new Money(amount, "EUR");
         } else {
-            return 0.20;
+            this.money.setAmount(amount);
         }
     }
 
-    public int getDaysOverdrawn() {
-        return daysOverdrawn;
-    }
-
-    public String getIban() {
-        return iban;
-    }
-
-    public void setIban(String iban) {
-        this.iban = iban;
-    }
-
-    public void setMoneyAmount(double amount) {
-        this.money.setAmount(amount);
+    // Метод для повної ініціалізації (використовується в тестах)
+    public void setMoney(double amount, String currency) {
+        this.money = new Money(amount, currency);
     }
 
     public double getMoneyAmount() {
-        return money.getAmount();
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-
-
-    public AccountType getType() {
-        return type;
-    }
-
-
-    public String printCustomer() {
-        // Замість ручного збору рядка викликаємо геттери клієнта
-        return customer.getName() + " " + customer.getEmail();
+        return money != null ? money.getAmount() : 0;
     }
 
     public String getCurrency() {
-        return money.getCurrency();
+        return money != null ? money.getCurrency() : "EUR";
     }
 
+    public void setIban(String iban) { this.iban = iban; }
+    public String getIban() { return iban; }
+    public int getDaysOverdrawn() { return daysOverdrawn; }
+    public void setCustomer(Customer customer) { this.customer = customer; }
+    public AccountType getType() { return type; }
+
     public String getAccountDetails() {
-        return money.toString();
+        return "Account: IBAN: " + iban + ", Money: " + (money != null ? money.toString() : "0 EUR") + ", Account type: " + type;
+    }
+
+    public String printCustomer() {
+        return customer.getName() + " " + customer.getEmail();
     }
 }
