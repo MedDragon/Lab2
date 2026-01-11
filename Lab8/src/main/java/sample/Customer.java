@@ -28,9 +28,10 @@ public class Customer {
     }
 
     public void withdraw(double sum, String currency) {
-        if (!account.getCurrency().equals(currency)) {
-            throw new RuntimeException("Can't extract withdraw " + currency);
-        }
+//        if (!account.getCurrency().equals(currency)) { було
+//            throw new RuntimeException("Can't extract withdraw " + currency);
+//        }
+        checkCurrency(currency); // Виклик нового методу
         if (account.getType().isPremium()) {
             switch (customerType) {
                 case COMPANY:
@@ -77,6 +78,7 @@ public class Customer {
         }
     }
 
+
     public String getName() {
         return name;
     }
@@ -102,13 +104,15 @@ public class Customer {
     }
 
     public String printCustomerDaysOverdrawn() {
-        String fullName = name + " " + surname + " ";
+        // Було: String fullName = name + " " + surname + " ";
+        String fullName = getFullName(); // Стало
         String accountDescription = "Account: IBAN: " + account.getIban() + ", Days Overdrawn: " + account.getDaysOverdrawn();
         return fullName + accountDescription;
     }
 
     public String printCustomerMoney() {
-        String fullName = name + " " + surname + " ";
+        // Було: String fullName = name + " " + surname + " ";
+        String fullName = getFullName(); // Стало
         String accountDescription = "";
         accountDescription += "Account: IBAN: " + account.getIban() + ", Money: " + account.getMoney();
         return fullName + accountDescription;
@@ -117,5 +121,15 @@ public class Customer {
     public String printCustomerAccount() {
         return "Account: IBAN: " + account.getIban() + ", Money: "
                 + account.getMoney() + ", Account type: " + account.getType();
+    }
+
+    public String getFullName() {
+        return name + " " + surname + " ";
+    }
+
+    private void checkCurrency(String currency) {
+        if (!account.getCurrency().equals(currency)) {
+            throw new RuntimeException("Can't extract withdraw " + currency);
+        }
     }
 }
