@@ -28,50 +28,14 @@ public class Customer {
     }
 
     public void withdraw(double sum, String currency) {
-        checkCurrency(currency); // Виклик нового методу
-        if (account.getType().isPremium()) {
-            switch (customerType) {
-                case COMPANY:
-                    // we are in overdraft
-                    if (account.getMoneyAmount() < 0) {
-                        // 50 percent discount for overdraft for premium account
-                        account.setMoneyAmount((account.getMoneyAmount() - sum) - sum * account.overdraftFee() * companyOverdraftDiscount / 2);
-                    } else {
-                        account.setMoneyAmount(account.getMoneyAmount() - sum);
-                    }
-                    break;
-                case PERSON:
+        checkCurrency(currency);
 
-                    // we are in overdraft
-                    if (account.getMoneyAmount() < 0) {
-                        account.setMoneyAmount((account.getMoneyAmount() - sum) - sum * account.overdraftFee());
-                    } else {
-                        account.setMoneyAmount(account.getMoneyAmount() - sum);
-                    }
-                    break;
-            }
-
+        if (account.getMoneyAmount() < 0) {
+            // Замість switch просто викликаємо поліморфний метод
+            double discount = customerType.getOverdraftDiscount(account.getType().isPremium(), companyOverdraftDiscount);
+            account.setMoneyAmount((account.getMoneyAmount() - sum) - sum * account.overdraftFee() * discount);
         } else {
-
-            switch (customerType) {
-                case COMPANY:
-                    // we are in overdraft
-                    if (account.getMoneyAmount() < 0) {
-                        // no discount for overdraft for not premium account
-                        account.setMoneyAmount((account.getMoneyAmount() - sum) - sum * account.overdraftFee() * companyOverdraftDiscount);
-                    } else {
-                        account.setMoneyAmount(account.getMoneyAmount() - sum);
-                    }
-                    break;
-                case PERSON:
-                    // we are in overdraft
-                    if (account.getMoneyAmount() < 0) {
-                        account.setMoneyAmount((account.getMoneyAmount() - sum) - sum * account.overdraftFee());
-                    } else {
-                        account.setMoneyAmount(account.getMoneyAmount() - sum);
-                    }
-                    break;
-            }
+            account.setMoneyAmount(account.getMoneyAmount() - sum);
         }
     }
 
